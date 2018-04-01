@@ -12,16 +12,12 @@ module.exports = {
     rules: [
       {
         test: /\.vue$/,
-        use: {
-          loader: 'vue-loader'
-        }
+        loader: 'vue-loader'
       },
       {
         test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader'
-        }
+        exclude: /node_modules\/(?![hoek|joi|topo])/,
+        loader: 'babel-loader'
       }
     ]
   },
