@@ -17,7 +17,7 @@
       <a class="btn btn-primary btn-sm btn-block"
           v-bind:class="{ disabled: events.length === 0 }"
           v-bind:href="icsConent"
-          download="test.ics">Calendar 등록</a>
+          v-bind:download="filename">Calendar 등록</a>
       <button class="btn btn-danger btn-sm btn-block" v-on:click="resetEvent">리셋</button>    
     </div>
     <!-- // event-form -->
@@ -36,6 +36,7 @@
 <script>
 var holidayKR = require('holiday-kr');
 var ics = require('ics');
+var faker = require('faker');
 
 new Date().toISOString().split('T')[0];
 var today = holidayKR.getLunar(new Date());
@@ -62,6 +63,15 @@ export default {
       if (year < 1900) { return '' }
       var gregorian = holidayKR.getSolar(year, month, day)
       return [gregorian.year, this.padder(gregorian.month), this.padder(gregorian.day)].join('-')
+    },
+    filename: function() {
+      var fakers = [
+        faker.commerce.color(),
+        faker.commerce.product(),
+        'in',
+        faker.hacker.noun()
+      ].join('-').replace(/ /g, '-').toLowerCase();
+      return fakers + '.ics';
     }
   },
   methods: {
