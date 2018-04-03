@@ -95,7 +95,7 @@ export default {
           dayOfWeek: gregorian.dayOfWeek
         }
         var icsEvent = {
-          title: this.lunarEventName,
+          title: this.lunarEventName + ' (음력: ' + [month, day].join('-') + ')',
           start: [gregorian.year, gregorian.month, gregorian.day],
           end: [gregorian.year, gregorian.month, gregorian.day]
         }
