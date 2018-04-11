@@ -11,7 +11,7 @@
       <input type="date" class="form-control" id="lunarEventDate" aria-describedby="solarEventDate"
         v-model="lunarEventDate" 
         v-on:change="eventGenerate">
-      <div id="solarEventDate" class="form-text text-muted">양력기준: {{ solarEventDate }}</div>
+      <div id="solarEventDate" class="form-text text-muted">양력기준: {{ solarEventDate }} <span v-show="isYun">, {{ solarYunEventDate }} <span class="badge badge-warning" v-show="isYun">윤</span></span></div>
     </div>
     <div>
       <a class="btn btn-primary btn-sm btn-block"
@@ -26,7 +26,7 @@
       <li class="list-group-item"
         v-for="(event, index) in events" 
         v-bind:key="index">
-          양력: {{ event.date }} <span class="badge badge-secondary">{{ event.dayOfWeek }}요일</span>
+          양력: {{ event.date }} <span class="badge badge-secondary">{{ event.dayOfWeek }}요일</span> <span class="badge badge-warning" v-show="event.isYun">윤</span>
       </li>
     </ul>
     <!-- // event-list -->
@@ -49,20 +49,39 @@ export default {
       'lunarEventName'  : '',
       'lunarEventDate'  : [today.year, this.padder(today.month), this.padder(today.day)].join('-'),
       'events'          : [],
-      'icsEvents'       : []
+      'icsEvents'       : [],
+      'isYun'           : today.leapMonth
     }
   },
   computed: {
     icsConent: function() {
-      const { error, value } = ics.createEvents(this.icsEvents)
+      const { error, value } = ics.createEvents(this.icsEvents);
       if (error) { return '' }
-      return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(value)
+      return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(value);
     },
     solarEventDate: function() {
       let [year, month, day] = this.lunarEventDate.split('-');
       if (year < 1900) { return '' }
-      var gregorian = holidayKR.getSolar(year, month, day)
-      return [gregorian.year, this.padder(gregorian.month), this.padder(gregorian.day)].join('-')
+      try {
+        var gregorian  = holidayKR.getSolar(year, month, day, false);
+      }
+      catch(err) {
+        return 'N/A';
+      }
+      return [gregorian.year, this.padder(gregorian.month), this.padder(gregorian.day)].join('-');
+    },
+    solarYunEventDate: function() {
+      let [year, month, day] = this.lunarEventDate.split('-');
+      if (year < 1900) { return '' }
+      try {
+        var gregorianY  = holidayKR.getSolar(year, month, day, true);
+      }
+      catch(err) {
+        this.isYun = false;
+        return 'N/A';
+      }
+      this.isYun = true;
+      return [gregorianY.year, this.padder(gregorianY.month), this.padder(gregorianY.day)].join('-');
     },
     filename: function() {
       var fakers = [
@@ -82,25 +101,19 @@ export default {
       if (year < 1900) { return '' }
       for (var i = year; i <= 2050; i++) {
         try {
-          var gregorian = holidayKR.getSolar(i, month, day);
-        } 
+          var gregorian = holidayKR.getSolar(i, month, day, false);
+        }
         catch(err) {
-          return;
+          gregorian = null;
         }
-        var event = {
-          date: [gregorian.year, this.padder(gregorian.month), this.padder(gregorian.day)].join('-'),
-          year: gregorian.year,
-          month: gregorian.month,
-          day: gregorian.day,
-          dayOfWeek: gregorian.dayOfWeek
+        try {
+          var gregorianY = holidayKR.getSolar(i, month, day, true);
         }
-        var icsEvent = {
-          title: this.lunarEventName + ' (음력: ' + [month, day].join('-') + ')',
-          start: [gregorian.year, gregorian.month, gregorian.day],
-          end: [gregorian.year, gregorian.month, gregorian.day]
+        catch(err) {
+          gregorianY = null;
         }
-        this.events.push(event);
-        this.icsEvents.push(icsEvent);
+        if (gregorian) { this.addEvent(gregorian, false) }
+        if (gregorianY) { this.addEvent(gregorianY, true) }
       }
     },
     resetEvent: function() {
@@ -113,6 +126,26 @@ export default {
       var str = "" + integer;
       var pad = "00";
       return (pad + str).slice(-pad.length);
+    },
+    addEvent: function(gregorian, isYun) {
+      var [year, month, day] = this.lunarEventDate.split('-');
+      var title = this.lunarEventName + ' (음력: ' + [month, day].join('-') + ')';
+      if (isYun) { title += ' (윤)'}
+      var event = {
+        date: [gregorian.year, this.padder(gregorian.month), this.padder(gregorian.day)].join('-'),
+        year: gregorian.year,
+        month: gregorian.month,
+        day: gregorian.day,
+        dayOfWeek: gregorian.dayOfWeek,
+        isYun: isYun
+      }
+      var icsEvent = {
+        title: title,
+        start: [gregorian.year, gregorian.month, gregorian.day],
+        end: [gregorian.year, gregorian.month, gregorian.day]
+      }
+      this.events.push(event);
+      this.icsEvents.push(icsEvent);
     }
   }
 }
