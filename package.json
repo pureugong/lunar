@@ -1,5 +1,6 @@
 {
   "name": "lunar",
+  "version" : "1.0.2",
   "description": "easy to generate lunar date ics file",
   "author": "Yunho, Jo <pureugong@gmail.com>",
   "license": "UNLICENSED",
