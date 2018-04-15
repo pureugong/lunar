@@ -37,9 +37,7 @@
 var holidayKR = require('holiday-kr');
 var ics = require('ics');
 var faker = require('faker');
-
-new Date().toISOString().split('T')[0];
-var today = holidayKR.getLunar(new Date());
+var today = new Date();
 
 export default {
   components: {
@@ -47,7 +45,7 @@ export default {
   data: function() {
     return {
       'lunarEventName'  : '',
-      'lunarEventDate'  : [today.year, this.padder(today.month), this.padder(today.day)].join('-'),
+      'lunarEventDate'  : [today.getFullYear(), this.padder(today.getMonth() - 1), '01'].join('-'),
       'events'          : [],
       'icsEvents'       : [],
       'isYun'           : today.leapMonth
@@ -119,7 +117,7 @@ export default {
     resetEvent: function() {
       this.events = [];
       this.icsEvents = [];
-      this.lunarEventDate = [today.year, this.padder(today.month), this.padder(today.day)].join('-'),
+      this.lunarEventDate = [today.getFullYear(), this.padder(today.getMonth() - 1), '01'].join('-'),
       this.lunarEventName = '';
     },
     padder: function(integer) {
