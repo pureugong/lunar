@@ -3,28 +3,28 @@
     <!-- event-form -->
     <div class="form-group">
       <input type="text" class="form-control" id="lunarEventName" aria-describedby="emailHelp"
-        placeholder="음력일정명" 
-        v-model="lunarEventName" 
+        placeholder="음력일정명"
+        v-model="lunarEventName"
         v-on:change="eventGenerate">
     </div>
     <div class="form-group">
       <input type="date" class="form-control" id="lunarEventDate" aria-describedby="solarEventDate"
-        v-model="lunarEventDate" 
+        v-model="lunarEventDate"
         v-on:change="eventGenerate">
       <div id="solarEventDate" class="form-text text-muted">양력기준: {{ solarEventDate }} <span v-show="isYun">, {{ solarYunEventDate }} <span class="badge badge-warning" v-show="isYun">윤</span></span></div>
     </div>
     <div>
       <a class="btn btn-primary btn-sm btn-block"
           v-bind:class="{ disabled: events.length === 0 }"
-          v-bind:href="icsConent"
+          v-bind:href="icsContent"
           v-bind:download="filename">Calendar 등록</a>
-      <button class="btn btn-danger btn-sm btn-block" v-on:click="resetEvent">리셋</button>    
+      <button class="btn btn-danger btn-sm btn-block" v-on:click="resetEvent">리셋</button>
     </div>
     <!-- // event-form -->
     <!-- event-list -->
     <ul class="list-group list-group-flush">
       <li class="list-group-item"
-        v-for="(event, index) in events" 
+        v-for="(event, index) in events"
         v-bind:key="index">
           양력: {{ event.date }} <span class="badge badge-secondary">{{ event.dayOfWeek }}요일</span> <span class="badge badge-warning" v-show="event.isYun">윤</span>
       </li>
@@ -34,25 +34,24 @@
 </template>
 
 <script>
-var holidayKR = require('holiday-kr');
-var ics = require('ics');
-var faker = require('faker');
+import holidayKR from 'holiday-kr';
+import * as ics from 'ics';
+import { faker } from '@faker-js/faker';
+
 var today = new Date();
 
 export default {
-  components: {
-  },
   data: function() {
     return {
       'lunarEventName'  : '',
       'lunarEventDate'  : [today.getFullYear(), this.padder(today.getMonth() - 1), '01'].join('-'),
       'events'          : [],
       'icsEvents'       : [],
-      'isYun'           : today.leapMonth
+      'isYun'           : false
     }
   },
   computed: {
-    icsConent: function() {
+    icsContent: function() {
       const { error, value } = ics.createEvents(this.icsEvents);
       if (error) { return '' }
       return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(value);
@@ -75,20 +74,34 @@ export default {
         var gregorianY  = holidayKR.getSolar(year, month, day, true);
       }
       catch(err) {
-        this.isYun = false;
         return 'N/A';
       }
-      this.isYun = true;
       return [gregorianY.year, this.padder(gregorianY.month), this.padder(gregorianY.day)].join('-');
+    },
+    hasYun: function() {
+      let [year, month, day] = this.lunarEventDate.split('-');
+      if (year < 1900) { return false }
+      try {
+        holidayKR.getSolar(year, month, day, true);
+      }
+      catch(err) {
+        return false;
+      }
+      return true;
     },
     filename: function() {
       var fakers = [
-        faker.commerce.color(),
+        faker.color.human(),
         faker.commerce.product(),
         'in',
         faker.hacker.noun()
       ].join('-').replace(/ /g, '-').toLowerCase();
       return fakers + '.ics';
+    }
+  },
+  watch: {
+    hasYun: function(val) {
+      this.isYun = val;
     }
   },
   methods: {

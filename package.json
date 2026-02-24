@@ -1,29 +1,22 @@
 {
   "name": "lunar",
-  "version" : "1.0.2",
+  "version": "2.0.0",
   "description": "easy to generate lunar date ics file",
   "author": "Yunho, Jo <pureugong@gmail.com>",
   "license": "UNLICENSED",
   "scripts": {
-    "dev": "webpack-dev-server --inline --hot",
-    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "faker": "^4.1.0",
+    "@faker-js/faker": "^9.0.0",
     "holiday-kr": "^0.1.5",
-    "ics": "^2.4.1",
-    "vue": "^2.5.16"
+    "ics": "^3.8.1",
+    "vue": "^3.5.0"
   },
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.2",
-    "babel-preset-env": "^1.6.0",
-    "babel-preset-es2015": "^6.24.1",
-    "cross-env": "^4.0.0",
-    "css-loader": "^0.28.1",
-    "vue-loader": "^13.0.5",
-    "vue-template-compiler": "^2.4.4",
-    "webpack": "^3.6.0",
-    "webpack-dev-server": "^2.9.1"
+    "@vitejs/plugin-vue": "^5.0.0",
+    "vite": "^6.0.0"
   }
 }
