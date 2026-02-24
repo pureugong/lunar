@@ -19,7 +19,7 @@
 
 <script>
 import EventForm from './components/EventForm.vue'
-import {version} from '..//package.json'
+import {version} from '../package.json'
 
 export default {
   components: {
